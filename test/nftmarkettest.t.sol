@@ -79,16 +79,10 @@ contract SignTest is Helpers {
             active:false
         );
 
-      
         uint256 initialSellerBalance = address(creator).balance;
-
-       
-        marketPlace.executeOrder(1);
-
   
+        marketPlace.executeOrder(1);
         uint256 finalSellerBalance = address(creator).balance;
-
-        // ERC721Marketplace.Order memory order = marketPlace.orders(1);
 
         assertEq(order.active, false, "Order should be inactive after execution");
         assertTrue(finalSellerBalance > initialSellerBalance, "Seller's balance should increase");
