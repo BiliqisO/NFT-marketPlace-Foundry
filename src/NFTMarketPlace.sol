@@ -1,15 +1,15 @@
-
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.21;
-import "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
-import "../lib/openzeppelin-contracts/contracts/interfaces/IERC721.sol";
-import "../lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
+pragma solidity ^0.8.19;
+
+import "openzeppelin/access/Ownable.sol";
+import "openzeppelin/interfaces/IERC721.sol";
+import "openzeppelin/utils/cryptography/ECDSA.sol";
 
 contract ERC721Marketplace is Ownable {
-
     using ECDSA for bytes32;
+
     struct Order {
-        uint orderId;
+        uint256 orderId;
         address creator;
         address tokenAddress;
         uint256 tokenId;
@@ -20,20 +20,31 @@ contract ERC721Marketplace is Ownable {
     }
 
     mapping(uint256 => Order) public orders;
-event Name();
-   uint OrderId;
+
+    event Name();
+
+    uint256 OrderId;
+
     function createOrder(
         address _tokenAddress,
         uint256 _tokenId,
         uint256 _price,
         bytes memory _signature,
         uint256 _deadline
-       
     ) external {
         IERC721 token = IERC721(_tokenAddress);
-        require(token.ownerOf(_tokenId) == msg.sender, "You do not own this token");
-            bytes32 orderHash = keccak256(abi.encode(_tokenAddress, _tokenId, _price));
-        require(orderHash.toEthSignedMessageHash().recover(_signature) == msg.sender, "Invalid signature");
+        require(
+            token.ownerOf(_tokenId) == msg.sender,
+            "You do not own this token"
+        );
+        bytes32 orderHash = keccak256(
+            abi.encode(_tokenAddress, _tokenId, _price)
+        );
+        require(
+            orderHash.toEthSignedMessageHash().recover(_signature) ==
+                msg.sender,
+            "Invalid signature"
+        );
         OrderId++;
         orders[OrderId] = Order({
             orderId: OrderId,
@@ -45,12 +56,10 @@ event Name();
             deadline: _deadline,
             active: true
         });
-        
     }
 
-    function executeOrder(uint256 orderId) external payable  {
+    function executeOrder(uint256 orderId) external payable {
         Order storage order = orders[orderId];
-   
         require(orders[orderId].creator != address(0), "Invalid order");
         require(orders[orderId].active, "Order is not active");
         require(msg.value == order.price, "Incorrect payment amount");
